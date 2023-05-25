@@ -15,8 +15,14 @@ module.exports = {
       },
       colors: {
         primary: colors.yellow,
+        secondary: colors.emerald,
+        tertiary: colors.blue,
+        quaternary: colors.indigo,
       },
     },
   },
+  safelist: [{
+    pattern: /(bg)-(primary|secondary|tertiary|quaternary)-(600)/
+}],
   plugins: [],
 }

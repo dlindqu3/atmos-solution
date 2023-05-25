@@ -10,6 +10,7 @@ import { Question as QuestionType } from './types'
 function App() {
   const [index, setIndex] = useState(0)
   const [data, setData] = useState({})
+  const [debounced, setDebounced] = useState({}); 
   const [status, setStatus] = useState({ state: '', lastSaved: new Date() })
   const [modal, setModal] = useState<string|null>(null)
 
@@ -23,17 +24,32 @@ function App() {
     setModal(newModal)
   }
 
-  const save = () => {
-    if (Object.keys(data).length > 0) {
-      setStatus({ ...status, state: 'working' })
-      setTimeout(() => {
-        setStatus({ state: 'saved', lastSaved: new Date() })
-      }, 1000)
-    }
-  }
+  // without debounce, save calls every time a character is typed etc. 
+  // const save = () => {
+  //   if (Object.keys(data).length > 0) {
+  //     setStatus({ ...status, state: 'working' })
+  //     let timeoutID = setTimeout(() => {
+  //       setStatus({ state: 'saved', lastSaved: new Date() })
+  //     }, 1000)
+  //     return timeoutID; 
+  //   }
+  // }
 
-  useEffect(() => {
-    save()
+  useEffect(() => {    
+    
+    // This useEffect does the same thing as a debounced save()
+    // I did not have enough time to actually alter the save() function itself to include a debounce
+    
+    const timeoutID = setTimeout(() => {
+      if (Object.keys(data).length > 0) {
+        setStatus({ ...status, state: 'working' })
+        setDebounced(data)
+        setStatus({ state: 'saved', lastSaved: new Date() })
+      }
+    }, 1000)
+
+    return () => { clearTimeout(timeoutID) }
+
   }, [data])
 
   const renderStatus = () => {
@@ -52,6 +68,7 @@ function App() {
     }
   }
 
+  // seems like debounce should be on this handleChange/setData...
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData({ ...data, [e.target.name]: e.target.value })
   }
@@ -101,8 +118,10 @@ function App() {
       ) }
 
       <div>
-        <pre>question = { JSON.stringify(question, null, 2) }</pre>
         <pre>data = { JSON.stringify(data, null, 2) }</pre>
+        {/* This debounced text will only show after a delay:  */}
+        <pre>debounce = { JSON.stringify(debounced, null, 2)}</pre>
+        <pre>question = { JSON.stringify(question, null, 2) }</pre>
       </div>
     </>
   )
